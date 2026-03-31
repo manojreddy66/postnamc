@@ -1,5 +1,5 @@
 const { BaseService } = require("./BaseService");
-
+const {Prisma}=require()
 class namcAllocationPlanData extends BaseService {
   constructor(db) {
     super(db);
