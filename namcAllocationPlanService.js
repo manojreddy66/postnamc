@@ -1,5 +1,5 @@
 const { BaseService } = require("./BaseService");
-const {Prisma}=require()
+const {Prisma}=require("@prisma/client");
 class namcAllocationPlanData extends BaseService {
   constructor(db) {
     super(db);
@@ -60,10 +60,10 @@ class namcAllocationPlanData extends BaseService {
   /**
    * @description Function to update monthly NAMC allocation plan
    */
-  async updateMonthlyNamcAllocation(scenarioId, userEmail, data) {
+  async updateMonthlyNamcAllocation(scenarioId, userEmail, data,tx=this.prisma) {
     try {
 
-      return await this.prisma.$queryRaw`
+      return await tx.$queryRaw`
                     update supply_planning.namc_allocation_plan n
                     set
                     monthly_volume = v.monthly_volume,
@@ -96,10 +96,10 @@ class namcAllocationPlanData extends BaseService {
   /**
    * @description Function to update daily NAMC allocation plan
    */
-  async updateDailyNamcAllocation(scenarioId, userEmail, data) {
+  async updateDailyNamcAllocation(scenarioId, userEmail, data, tx=this.prisma) {
     try {
 
-      return await this.prisma.$queryRaw`
+      return await tx.$queryRaw`
                   update supply_planning.namc_allocation_plan n
                   set
                   daily_volume = v.daily_volume,

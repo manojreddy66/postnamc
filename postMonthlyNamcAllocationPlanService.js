@@ -5,8 +5,8 @@
 const { BadRequest } = require("utils/api_response_utils");
 const { validateInput } = require("./validateRequest");
 const {
-  updateMonthlyNamcAllocPlanNScenarioStepData,
-} = require("./monthlyNamcAllocationPlan");
+  updateMonthlyNamcAllocNScenarioStepData,
+} = require("./postMonthlyNamcAllocationPlan");
 const { prepareResponse } = require("./utils");
 
 /**
@@ -22,12 +22,12 @@ async function updateMonthlyNamcAllocationPlan(event) {
     /**
      * @description Validate input body
      * @param {Object} requestBody - request body
-     * @return {Object} errorMessages & scenarioData
+     * @return {Object} errMessages & scenarioData
      */
-    const {errorMessages, scenarioData} = await validateInput(requestBody);
+    const {errMessages, scenarioData} = await validateInput(requestBody);
     /* If validation errors exist, throw BadRequest error */
-    if (errorMessages.length > 0) {
-      throw new BadRequest(errorMessages);
+    if (errMessages.length > 0) {
+      throw new BadRequest(errMessages);
     }
     const { scenarioId, userEmail, data } = requestBody;
     /**

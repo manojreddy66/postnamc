@@ -12,31 +12,31 @@ const { emptyInputCheck } = require("utils/common_utils");
 /**
  * @description Function to validate input request body
  * @param {Object} requestBody: API input request body
- * @returns {Array} errorMessages - Validation errors if any
+ * @returns {Object} response: object containing errMessages and scenarioData
  */
 async function validateInput(requestBody) {
   const errMessages = [];
   /**
-    * @description Check if request body is empty
-    */
-   emptyInputCheck(requestBody);
+   * @description Check if request body is empty
+   */
+  emptyInputCheck(requestBody);
   /**
    * @description Validate request body using Joi schema
    * @param {Object} requestBody - request body
    * @param {Array} errMessages - array of validation errors
    */
   await validateParams(requestBody, errMessages);
-    let scenarioData = null;
+  let scenarioData = null;
+  /**
+   * @description If Joi validation passed, perform DB validations
+   */
+  if (errMessages.length === 0) {
     /**
-    * @description If Joi validation passed, perform DB validations
-    */
-    if (errorMessages.length === 0) {
-        /**
-        * @description Validate scenario exists (DB validation)
-        */
-        scenarioData = await checkForInvalidScenario(requestBody, errMessages);
-    }
-  return { errorMessages, scenarioData };
+     * @description Validate scenario exists (DB validation)
+     */
+    scenarioData = await checkForInvalidScenario(requestBody, errMessages);
+  }
+  return { errMessages, scenarioData };
 }
 
 /**

@@ -42,24 +42,28 @@ async function updateMonthlyNamcAllocNScenarioStepData(
   const scenariosDataService = new scenariosData(rdb);
   try {
     const scenarioId = scenarioData.scenario_id;
+    console.log("scenarioData:", scenarioData);
     /**
      * @description Convert input monthYear values to DB required month format and make it unique months
      */
     const monthYears = getUniqueMonthYears(data);
+    console.log("monthYears:", monthYears);
     /**
      * @description Fetch NAMC production calendar data for edited months
      */
     const productionCalendarData =
-      await namcProductionCalendarDataService.getNamcProductionCalendarData(
+      await namcProductionCalendarDataService.getNamcProductionCalendarDataByMonthYears(
         scenarioId,
         monthYears,
       );
-
+console.log("productionCalendarData:", productionCalendarData);
     /**
      * @description Build monthly and daily redistributed update data
      */
     const { monthlyData, redistributedDailyData } =
       buildRedistributedAllocationData(data, productionCalendarData);
+    console.log("monthlyData:", monthlyData);
+    console.log("redistributedDailyData:", redistributedDailyData);
     await rdb.prisma.$transaction(async (tx) => {
       /**
        * @description Update only monthly volume for edited months
@@ -99,8 +103,7 @@ async function updateMonthlyNamcAllocNScenarioStepData(
        */
       if (
         scenarioData &&
-        scenarioData.length > 0 &&
-        scenarioData[0].scenario_status !== SCENARIO_STATUSES.IN_PROGRESS
+        scenarioData.scenario_status !== SCENARIO_STATUSES.IN_PROGRESS
       ) {
         await scenariosDataService.updateScenarioStatus(
           scenarioId,

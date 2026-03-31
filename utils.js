@@ -31,7 +31,7 @@ function formatInputMonthYearToDbMonthYear(monthYear) {
 function getUniqueMonthYears(data) {
   return [
     ...new Set(
-      data.map((item) => formatInputMonthYearToDbMonthYear(item.monthYear)),
+      data.map((item) => formatInputMonthYearToDbMonthYear(item.monthYear))
     ),
   ];
 }
@@ -59,7 +59,6 @@ function redistributeMonthlyInteger({ monthlyVolume, calendarRows }) {
   let allocated = 0;
 
   rows.forEach((row) => {
-    if (row.weight <= 0) return;
     const rawShare = (Number(monthlyVolume) * row.weight) / totalWeight;
     row.dailyVolume = Math.floor(rawShare);
     row.remainder = rawShare - row.dailyVolume;
@@ -78,21 +77,18 @@ function redistributeMonthlyInteger({ monthlyVolume, calendarRows }) {
 
   return rows.map(({ prodDate, dailyVolume }) => ({
     prodDate,
-    dailyVolume
+    dailyVolume,
   }));
 }
 
 function getCalendarRowsWithWeights(calendarRows) {
   return calendarRows.map((row, idx) => {
-    const percentage = Number(row.percentage || 0);
-    const isWorking = Boolean(row.isWorking);
-
     return {
       idx,
       prodDate: row.prodDate,
-      isWorking,
-      percentage,
-      weight: isWorking ? Math.max(0, percentage) : 0,
+      isWorking: row.isWorking,
+      percentage: row.percentage,
+      weight: row.isWorking ? row.percentage : 0,
       dailyVolume: 0,
       remainder: 0,
     };
@@ -104,7 +100,6 @@ function getWorkingDayCandidates(rows) {
     .filter((row) => row.weight > 0)
     .sort((a, b) => {
       if (b.remainder !== a.remainder) return b.remainder - a.remainder;
-      if (b.weight !== a.weight) return b.weight - a.weight;
       return a.idx - b.idx;
     });
 }
@@ -141,26 +136,28 @@ function groupProductionCalendarByMonth(productionCalendarData) {
  */
 function buildRedistributedAllocationData(data, productionCalendarData) {
   const groupedCalendarData = groupProductionCalendarByMonth(
-    productionCalendarData,
+    productionCalendarData
   );
   const monthlyData = [];
   const redistributedDailyData = [];
 
   data.forEach((item) => {
     const dbMonthYear = formatInputMonthYearToDbMonthYear(item.monthYear);
+    const monthlyVolume = Number(item.monthlyVolume || 0);
     const monthCalendarRows = groupedCalendarData[dbMonthYear] || [];
 
+    monthlyData.push({
+      monthYear: dbMonthYear,
+      subSeries: item.subSeries,
+      monthlyVolume,
+    });
+
     if (!monthCalendarRows.length) {
-      monthlyData.push({
-        monthYear: dbMonthYear,
-        subSeries: item.subSeries,
-        monthlyVolume: Number(item.monthlyVolume || 0),
-      });
       return;
     }
 
     const redistributedRows = redistributeMonthlyInteger({
-      monthlyVolume: Number(item.monthlyVolume || 0),
+      monthlyVolume,
       calendarRows: monthCalendarRows,
     });
 
@@ -169,7 +166,8 @@ function buildRedistributedAllocationData(data, productionCalendarData) {
         prodDate: row.prodDate,
         monthYear: dbMonthYear,
         subSeries: item.subSeries,
-        dailyVolume: row.dailyVolume
+        dailyVolume: row.dailyVolume,
+        monthlyVolume,
       });
     });
   });
